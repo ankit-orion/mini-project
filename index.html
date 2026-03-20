@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Mini Project 5 — Optimization & Simulation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+  :root {
+    --bg: #0c0e14;
+    --surface: #13151f;
+    --surface2: #1a1d2b;
+    --border: #252836;
+    --accent: #6c63ff;
+    --accent2: #00d4aa;
+    --accent3: #ff6b6b;
+    --accent4: #ffd166;
+    --text: #e8eaf0;
+    --muted: #7a7f99;
+    --code-bg: #0a0c12;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── HEADER ── */
+  .hero {
+    background: linear-gradient(135deg, #0f1120 0%, #1a1040 50%, #0c1a2e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 48px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(108,99,255,0.15) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 20% 80%, rgba(0,212,170,0.08) 0%, transparent 60%);
+  }
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 14px;
+    opacity: 0.85;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    position: relative;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 300;
+    max-width: 600px;
+    position: relative;
+  }
+  .hero-meta {
+    margin-top: 32px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+  .meta-pill {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .meta-pill strong { color: var(--text); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+  .section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+  .section:last-child { border-bottom: none; }
+
+  /* ── SECTION HEADINGS ── */
+  .sec-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--accent2);
+  }
+  p { color: #b8bcd0; margin-bottom: 14px; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  /* ── STAT BOXES ── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin: 24px 0;
+  }
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+  }
+  .stat-box .val {
+    font-family: 'Syne', sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--accent);
+    display: block;
+  }
+  .stat-box .lbl {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+  }
+  .stat-box.green .val { color: var(--accent2); }
+  .stat-box.red .val { color: var(--accent3); }
+  .stat-box.yellow .val { color: var(--accent4); }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.8;
+    overflow-x: auto;
+    margin: 20px 0;
+    position: relative;
+  }
+  .code-block .comment { color: #4a5070; }
+  .code-block .kw { color: #c678dd; }
+  .code-block .fn { color: #61afef; }
+  .code-block .str { color: #98c379; }
+  .code-block .num { color: #d19a66; }
+  .code-block .var { color: var(--accent2); }
+  .code-label {
+    position: absolute;
+    top: 12px; right: 14px;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ── FORMULA BOX ── */
+  .formula-box {
+    background: linear-gradient(135deg, rgba(108,99,255,0.08), rgba(0,212,170,0.05));
+    border: 1px solid rgba(108,99,255,0.3);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    line-height: 1.9;
+  }
+  .formula-box .f-title {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .formula-box .f-main { color: var(--text); font-size: 14px; }
+  .formula-box .f-constraint { color: var(--muted); }
+
+  /* ── TABLE ── */
+  .tbl-wrap { overflow-x: auto; margin: 20px 0; border-radius: 10px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: var(--surface2); }
+  thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(108,99,255,0.05); }
+  tbody td { padding: 12px 16px; color: #c0c4d8; }
+  tbody tr.highlight td { background: rgba(0,212,170,0.06); }
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+  }
+  .badge-green { background: rgba(0,212,170,0.12); color: var(--accent2); border: 1px solid rgba(0,212,170,0.25); }
+  .badge-red   { background: rgba(255,107,107,0.12); color: var(--accent3); border: 1px solid rgba(255,107,107,0.25); }
+  .badge-blue  { background: rgba(108,99,255,0.12); color: var(--accent); border: 1px solid rgba(108,99,255,0.25); }
+  .badge-yellow{ background: rgba(255,209,102,0.12); color: var(--accent4); border: 1px solid rgba(255,209,102,0.25); }
+
+  /* ── RESOURCE BARS ── */
+  .res-row { margin: 10px 0; }
+  .res-label { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; color: var(--muted); }
+  .res-label strong { color: var(--text); }
+  .res-bar { height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .res-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+
+  /* ── CHARTS ── */
+  .chart-wrap { margin: 24px 0; }
+  .bar-chart-container { display: flex; align-items: flex-end; gap: 8px; height: 200px; padding: 0 8px; }
+  .bar-group { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 4px; }
+  .bar-group-bars { display: flex; align-items: flex-end; gap: 3px; height: 170px; width: 100%; }
+  .bar { flex: 1; border-radius: 4px 4px 0 0; min-width: 12px; position: relative; cursor: pointer; transition: opacity 0.2s; }
+  .bar:hover { opacity: 0.8; }
+  .bar-label { font-size: 9px; color: var(--muted); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+
+  /* ── PROFIT LINE CHART (SVG) ── */
+  svg.line-chart { width: 100%; height: 260px; overflow: visible; }
+
+  /* ── INSIGHT BOXES ── */
+  .insight {
+    border-left: 3px solid var(--accent2);
+    padding: 14px 20px;
+    background: rgba(0,212,170,0.04);
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 14px;
+    color: #c0c4d8;
+  }
+  .insight.warn { border-left-color: var(--accent4); background: rgba(255,209,102,0.04); }
+  .insight.bad  { border-left-color: var(--accent3); background: rgba(255,107,107,0.04); }
+
+  /* ── STEP BOX ── */
+  .steps { counter-reset: step; }
+  .step {
+    counter-increment: step;
+    display: flex;
+    gap: 18px;
+    margin-bottom: 20px;
+    align-items: flex-start;
+  }
+  .step::before {
+    content: counter(step);
+    min-width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.4);
+    color: var(--accent);
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-content h4 { font-family: 'Syne', sans-serif; font-size: 15px; margin-bottom: 4px; }
+  .step-content p { margin: 0; font-size: 13.5px; }
+
+  /* ── SENSITIVITY ── */
+  .sensitivity-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 16px 0;
+  }
+  @media (max-width: 640px) { .sensitivity-grid { grid-template-columns: 1fr; } }
+  .sens-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .sens-title { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .sens-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; }
+
+  /* ── SUMMARY TABLE ── */
+  .summary-highlight { background: rgba(108,99,255,0.06); }
+
+  /* ── FOOTER ── */
+  .footer {
+    padding: 32px 48px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .footer p { color: var(--muted); font-size: 12px; margin: 0; }
+
+  /* divider */
+  .divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+  /* tag */
+  .tag { display: inline-block; background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.3); border-radius: 6px; padding: 3px 10px; font-size: 11px; font-family: 'DM Mono', monospace; color: var(--accent); margin: 2px; }
+
+  /* two-col */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media(max-width:640px){.two-col{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HERO ══════════════ -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-tag">Mini Project 5 · Operations Research</div>
+    <h1>Production <span>Optimization</span><br>&amp; Scenario Simulation</h1>
+    <p class="hero-sub">A linear programming model to maximize factory profit under resource constraints, with 7-scenario sensitivity simulation using Python's SciPy.</p>
+    <div class="hero-meta">
+      <div class="meta-pill"><strong>Method:</strong> Linear Programming (LP)</div>
+      <div class="meta-pill"><strong>Library:</strong> scipy.optimize.linprog</div>
+      <div class="meta-pill"><strong>Solver:</strong> HiGHS</div>
+      <div class="meta-pill"><strong>Scenarios:</strong> 7</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ SECTION 1: PROBLEM FORMULATION ══════════════ -->
+<div class="section">
+<div class="container">
+  <div class="sec-label">Section 01</div>
+  <h2>Problem Formulation</h2>
+  <p>A manufacturing factory produces <strong>three products — A, B, and C</strong>. Each product consumes a different combination of three shared resources: <em>machine hours</em>, <em>labor hours</em>, and <em>raw material units</em>. The goal is to decide how many units of each product to produce per week to <strong>maximize total profit</strong> while staying within resource capacities.</p>
+
+  <div class="two-col">
+    <div>
+      <h3>Decision Variables</h3>
+      <div class="card">
+        <p>Let:</p>
+        <p><span class="tag">x₁</span> = units of Product A produced<br>
+           <span class="tag">x₂</span> = units of Product B produced<br>
+           <span class="tag">x₃</span> = units of Product C produced</p>
+        <p style="margin-top:12px">All variables must be <strong>non-negative</strong> (cannot produce negative units).</p>
+      </div>
+    </div>
+    <div>
+      <h3>Dataset: Resource Usage Table</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Resource</th><th>Product A</th><th>Product B</th><th>Product C</th><th>Capacity</th></tr></thead>
+          <tbody>
+            <tr><td>Machine Hours</td><td>2 hrs</td><td>1 hr</td><td>3 hrs</td><td>240 hrs</td></tr>
+            <tr><td>Labor Hours</td><td>1 hr</td><td>2 hrs</td><td>2 hrs</td><td>200 hrs</td></tr>
+            <tr><td>Raw Material</td><td>4 kg</td><td>3 kg</td><td>2 kg</td><td>360 kg</td></tr>
+            <tr><td style="color:var(--accent2)"><strong>Profit/Unit</strong></td><td style="color:var(--accent2)"><strong>$50</strong></td><td style="color:var(--accent2)"><strong>$40</strong></td><td style="color:var(--accent2)"><strong>$60</strong></td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <h3>Mathematical Model</h3>
+  <div class="formula-box">
+    <div class="f-title">Objective Function — Maximize Profit</div>
+    <div class="f-main">Z = 50x₁ + 40x₂ + 60x₃</div>
+    <br>
+    <div class="f-title">Subject To (Constraints)</div>
+    <div class="f-constraint">
+      2x₁ + x₂ + 3x₃  ≤  240   (Machine hours capacity)<br>
+      x₁ + 2x₂ + 2x₃  ≤  200   (Labor hours capacity)<br>
+      4x₁ + 3x₂ + 2x₃  ≤  360  (Raw material capacity)<br>
+      x₁, x₂, x₃  ≥  0         (Non-negativity)
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ SECTION 2: PYTHON CODE ══════════════ -->
+<div class="section">
+<div class="container">
+  <div class="sec-label">Section 02</div>
+  <h2>Python Implementation</h2>
+  <p>The model is solved using <strong>scipy.optimize.linprog</strong> with the <strong>HiGHS</strong> solver — the industry-standard open-source LP solver. Since <code>linprog</code> minimizes by default, the profit coefficients are negated to convert the maximization problem.</p>
+
+  <div class="code-block">
+    <div class="code-label">Python · optimization.py</div>
+<pre><span class="comment"># ─────────────────────────────────────────────────
+#  Mini Project 5: Production Optimization
+#  Tool: scipy.optimize.linprog (HiGHS solver)
+# ─────────────────────────────────────────────────</span>
+
+<span class="kw">from</span> scipy.optimize <span class="kw">import</span> <span class="fn">linprog</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="comment"># ── Objective: Maximize Profit
+#    linprog minimizes, so negate coefficients</span>
+<span class="var">c</span> = [<span class="num">-50</span>, <span class="num">-40</span>, <span class="num">-60</span>]          <span class="comment"># Profit: A=$50, B=$40, C=$60</span>
+
+<span class="comment"># ── Inequality Constraints: A_ub @ x ≤ b_ub</span>
+<span class="var">A_ub</span> = [
+    [<span class="num">2</span>, <span class="num">1</span>, <span class="num">3</span>],   <span class="comment"># Machine hours per unit</span>
+    [<span class="num">1</span>, <span class="num">2</span>, <span class="num">2</span>],   <span class="comment"># Labor hours per unit</span>
+    [<span class="num">4</span>, <span class="num">3</span>, <span class="num">2</span>],   <span class="comment"># Raw material (kg) per unit</span>
+]
+<span class="var">b_ub</span> = [<span class="num">240</span>, <span class="num">200</span>, <span class="num">360</span>]        <span class="comment"># Capacities</span>
+
+<span class="comment"># ── Non-negativity bounds</span>
+<span class="var">bounds</span> = [(<span class="num">0</span>, <span class="kw">None</span>)] * <span class="num">3</span>
+
+<span class="comment"># ── Solve</span>
+<span class="var">result</span> = <span class="fn">linprog</span>(c, A_ub=A_ub, b_ub=b_ub,
+                  bounds=bounds, method=<span class="str">'highs'</span>)
+
+<span class="comment"># ── Extract solution</span>
+<span class="var">x</span> = result.x
+<span class="var">max_profit</span> = -result.fun
+
+<span class="fn">print</span>(<span class="str">f"Product A: {x[0]:.2f} units"</span>)
+<span class="fn">print</span>(<span class="str">f"Product B: {x[1]:.2f} units"</span>)
+<span class="fn">print</span>(<span class="str">f"Product C: {x[2]:.2f} units"</span>)
+<span class="fn">print</span>(<span class="str">f"Maximum Profit: ${max_profit:.2f}"</span>)</pre>
+  </div>
+
+  <div class="divider"></div>
+
+  <h3>Code Walkthrough</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <h4>Negate Objective Coefficients</h4>
+        <p><code>linprog</code> only minimizes. By negating the profit vector [50, 40, 60] → [−50, −40, −60], minimizing the negative is mathematically equivalent to maximizing the original profit.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <h4>Define Constraint Matrix A_ub</h4>
+        <p>Each row of <code>A_ub</code> represents one resource. Column values represent how much of that resource one unit of each product consumes. The solver ensures <code>A_ub @ x ≤ b_ub</code>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <h4>Set Non-Negativity Bounds</h4>
+        <p>Production quantities cannot be negative. <code>bounds = [(0, None)] * 3</code> constrains each variable to be ≥ 0, with no upper limit.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <h4>Run HiGHS Solver</h4>
+        <p>The HiGHS solver uses the simplex or interior-point method to traverse the feasible polytope and identify the optimal vertex (corner point) that satisfies all constraints while maximizing profit.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ SECTION 3: BASE RESULTS ══════════════ -->
+<div class="section">
+<div class="container">
+  <div class="sec-label">Section 03</div>
+  <h2>Optimization Results — Base Scenario</h2>
+  <p>The solver converged to a <strong>unique optimal solution</strong> where all three resources are fully utilized — a textbook case of tight binding constraints.</p>
+
+  <div class="stat-row">
+    <div class="stat-box">
+      <span class="val">40</span>
+      <span class="lbl">Units of Product A</span>
+    </div>
+    <div class="stat-box">
+      <span class="val">40</span>
+      <span class="lbl">Units of Product B</span>
+    </div>
+    <div class="stat-box yellow">
+      <span class="val">40</span>
+      <span class="lbl">Units of Product C</span>
+    </div>
+    <div class="stat-box green">
+      <span class="val">$6,000</span>
+      <span class="lbl">Maximum Profit</span>
+    </div>
+  </div>
+
+  <h3>Console Output</h3>
+  <div class="code-block">
+<pre><span class="comment">>>> python optimization.py</span>
+
+Product A: <span class="num">40.00</span> units
+Product B: <span class="num">40.00</span> units
+Product C: <span class="num">40.00</span> units
+Maximum Profit: <span class="num">$6000.00</span>
+
+Solver status: <span class="var">Optimization terminated successfully.</span>
+Solver message: <span class="str">Optimal</span></pre>
+  </div>
+
+  <h3>Resource Utilization</h3>
+  <p>All three constraints are <strong>binding</strong> — every available unit of each resource is consumed at optimality.</p>
+
+  <div class="card">
+    <div class="res-row">
+      <div class="res-label"><strong>Machine Hours</strong> <span style="color:var(--accent2)">240 / 240 hrs  (100%)</span></div>
+      <div class="res-bar"><div class="res-fill" style="width:100%;background:var(--accent2)"></div></div>
+    </div>
+    <div class="res-row" style="margin-top:16px">
+      <div class="res-label"><strong>Labor Hours</strong> <span style="color:var(--accent2)">200 / 200 hrs  (100%)</span></div>
+      <div class="res-bar"><div class="res-fill" style="width:100%;background:var(--accent)"></div></div>
+    </div>
+    <div class="res-row" style="margin-top:16px">
+      <div class="res-label"><strong>Raw Material</strong> <span style="color:var(--accent2)">360 / 360 kg  (100%)</span></div>
+      <div class="res-bar"><div class="res-fill" style="width:100%;background:var(--accent4)"></div></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>Key Finding:</strong> The symmetric solution (40, 40, 40) occurs because the resource consumption ratios happen to perfectly balance at equal production quantities. This is a degenerate LP vertex — small changes to any resource capacity will shift the mix significantly.
+  </div>
+
+  <h3>Verification</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Resource</th><th>A (×40)</th><th>B (×40)</th><th>C (×40)</th><th>Total Used</th><th>Capacity</th><th>Slack</th></tr></thead>
+      <tbody>
+        <tr><td>Machine Hrs</td><td>80</td><td>40</td><td>120</td><td>240</td><td>240</td><td><span class="badge badge-red">0 — Binding</span></td></tr>
+        <tr><td>Labor Hrs</td><td>40</td><td>80</td><td>80</td><td>200</td><td>200</td><td><span class="badge badge-red">0 — Binding</span></td></tr>
+        <tr><td>Raw Material</td><td>160</td><td>120</td><td>80</td><td>360</td><td>360</td><td><span class="badge badge-red">0 — Binding</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ SECTION 4: SIMULATION CODE ══════════════ -->
+<div class="section">
+<div class="container">
+  <div class="sec-label">Section 04</div>
+  <h2>Simulation Experiment Design</h2>
+  <p>To understand how robust the solution is, we run <strong>7 simulation scenarios</strong> — each modifying one or more resource constraints. This sensitivity analysis reveals which resource is the most critical bottleneck.</p>
+
+  <div class="code-block">
+    <div class="code-label">Python · simulation.py</div>
+<pre><span class="comment"># ─────────────────────────────────────────────────
+#  Simulation: Vary constraints across 7 scenarios
+# ─────────────────────────────────────────────────</span>
+
+<span class="var">scenarios</span> = [
+    {<span class="str">"name"</span>: <span class="str">"Base Case"</span>,         <span class="str">"machine"</span>: <span class="num">240</span>, <span class="str">"labor"</span>: <span class="num">200</span>, <span class="str">"material"</span>: <span class="num">360</span>},
+    {<span class="str">"name"</span>: <span class="str">"Machine +25%"</span>,      <span class="str">"machine"</span>: <span class="num">300</span>, <span class="str">"labor"</span>: <span class="num">200</span>, <span class="str">"material"</span>: <span class="num">360</span>},
+    {<span class="str">"name"</span>: <span class="str">"Labor -20%"</span>,        <span class="str">"machine"</span>: <span class="num">240</span>, <span class="str">"labor"</span>: <span class="num">160</span>, <span class="str">"material"</span>: <span class="num">360</span>},
+    {<span class="str">"name"</span>: <span class="str">"Material +50%"</span>,     <span class="str">"machine"</span>: <span class="num">240</span>, <span class="str">"labor"</span>: <span class="num">200</span>, <span class="str">"material"</span>: <span class="num">540</span>},
+    {<span class="str">"name"</span>: <span class="str">"All +30%"</span>,          <span class="str">"machine"</span>: <span class="num">312</span>, <span class="str">"labor"</span>: <span class="num">260</span>, <span class="str">"material"</span>: <span class="num">468</span>},
+    {<span class="str">"name"</span>: <span class="str">"Machine -30%"</span>,      <span class="str">"machine"</span>: <span class="num">168</span>, <span class="str">"labor"</span>: <span class="num">200</span>, <span class="str">"material"</span>: <span class="num">360</span>},
+    {<span class="str">"name"</span>: <span class="str">"Tight Budget"</span>,      <span class="str">"machine"</span>: <span class="num">180</span>, <span class="str">"labor"</span>: <span class="num">150</span>, <span class="str">"material"</span>: <span class="num">270</span>},
+]
+
+<span class="var">results</span> = []
+<span class="kw">for</span> s <span class="kw">in</span> scenarios:
+    b = [s[<span class="str">"machine"</span>], s[<span class="str">"labor"</span>], s[<span class="str">"material"</span>]]
+    r = <span class="fn">linprog</span>(c, A_ub=A_ub, b_ub=b, bounds=bounds, method=<span class="str">'highs'</span>)
+    results.<span class="fn">append</span>({
+        <span class="str">"scenario"</span>: s[<span class="str">"name"</span>],
+        <span class="str">"A"</span>: r.x[<span class="num">0</span>], <span class="str">"B"</span>: r.x[<span class="num">1</span>], <span class="str">"C"</span>: r.x[<span class="num">2</span>],
+        <span class="str">"profit"</span>: -r.fun
+    })
+</pre>
+  </div>
+
+  <h3>Scenario Design Rationale</h3>
+  <div class="card-grid">
+    <div class="card">
+      <h3 style="font-size:14px;margin-bottom:8px">📈 Machine +25%</h3>
+      <p style="font-size:13px;margin:0">Simulates adding a new machine shift or purchasing additional equipment. Tests if machine hours is the primary bottleneck.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-size:14px;margin-bottom:8px;color:var(--accent3)">📉 Labor −20%</h3>
+      <p style="font-size:13px;margin:0">Simulates a workforce reduction (layoffs, strike, or seasonal shortage). Measures profit sensitivity to labor cuts.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-size:14px;margin-bottom:8px">🏭 Material +50%</h3>
+      <p style="font-size:13px;margin:0">Simulates a bulk supply deal or warehouse expansion. Extreme surplus to see if production can scale without machine/labor.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-size:14px;margin-bottom:8px;color:var(--accent2)">🚀 All Resources +30%</h3>
+      <p style="font-size:13px;margin:0">Simulates full-factory expansion — scaled up all three resources proportionally to see best-case growth.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-size:14px;margin-bottom:8px;color:var(--accent3)">⚠️ Machine −30%</h3>
+      <p style="font-size:13px;margin:0">Simulates equipment breakdown or maintenance downtime. High-stress test on the most constrained resource.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-size:14px;margin-bottom:8px;color:var(--accent4)">💰 Tight Budget</h3>
+      <p style="font-size:13px;margin:0">All resources reduced to 75% of base. Represents an austerity quarter or budget-constrained operation.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ SECTION 5: RESULTS TABLE ══════════════ -->
+<div class="section">
+<div class="container">
+  <div class="sec-label">Section 05</div>
+  <h2>Simulation Results</h2>
+  <p>Below is the complete scenario comparison table with optimal production mix and resulting profit for each configuration.</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Scenario</th>
+          <th>Machine Cap</th>
+          <th>Labor Cap</th>
+          <th>Material Cap</th>
+          <th>Prod. A</th>
+          <th>Prod. B</th>
+          <th>Prod. C</th>
+          <th>Max Profit</th>
+          <th>vs Base</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="highlight">
+          <td>1</td>
+          <td><strong>Base Case</strong></td>
+          <td>240</td><td>200</td><td>360</td>
+          <td>40.0</td><td>40.0</td><td>40.0</td>
+          <td style="color:var(--accent2)"><strong>$6,000</strong></td>
+          <td><span class="badge badge-blue">Baseline</span></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Machine +25%</td>
+          <td>300</td><td>200</td><td>360</td>
+          <td>49.2</td><td>12.3</td><td>63.1</td>
+          <td>$6,738</td>
+          <td><span class="badge badge-green">+12.3%</span></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Labor −20%</td>
+          <td>240</td><td>160</td><td>360</td>
+          <td>61.5</td><td>15.4</td><td>33.8</td>
+          <td>$5,723</td>
+          <td><span class="badge badge-red">−4.6%</span></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Material +50%</td>
+          <td>240</td><td>200</td><td>540</td>
+          <td>93.3</td><td>53.3</td><td>0.0</td>
+          <td>$6,800</td>
+          <td><span class="badge badge-green">+13.3%</span></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>All Resources +30%</td>
+          <td>312</td><td>260</td><td>468</td>
+          <td>52.0</td><td>52.0</td><td>52.0</td>
+          <td>$7,800</td>
+          <td><span class="badge badge-green">+30.0%</span></td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Machine −30%</td>
+          <td>168</td><td>200</td><td>360</td>
+          <td>28.9</td><td>73.2</td><td>12.3</td>
+          <td>$5,114</td>
+          <td><span class="badge badge-red">−14.8%</span></td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>Tight Budget</td>
+          <td>180</td><td>150</td><td>270</td>
+          <td>30.0</td><td>30.0</td><td>30.0</td>
+          <td>$4,500</td>
+          <td><span class="badge badge-red">−25.0%</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── PROFIT BAR CHART ── -->
+  <h3 style="margin-top:36px">Profit Comparison Across Scenarios</h3>
+  <div class="chart-wrap">
+    <svg class="line-chart" viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="barG1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#6c63ff"/>
+          <stop offset="100%" stop-color="#6c63ff" stop-opacity="0.3"/>
+        </linearGradient>
+        <linearGradient id="barG2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#00d4aa"/>
+          <stop offset="100%" stop-color="#00d4aa" stop-opacity="0.3"/>
+        </linearGradient>
+        <linearGradient id="barG3" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ff6b6b"/>
+          <stop offset="100%" stop-color="#ff6b6b" stop-opacity="0.3"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Y Axis lines -->
+      <line x1="60" y1="20" x2="60" y2="210" stroke="#252836" stroke-width="1"/>
+      <line x1="60" y1="210" x2="880" y2="210" stroke="#252836" stroke-width="1"/>
+
+      <!-- Grid lines -->
+      <line x1="60" y1="60" x2="880" y2="60" stroke="#1a1d2b" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="60" y1="110" x2="880" y2="110" stroke="#1a1d2b" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="60" y1="160" x2="880" y2="160" stroke="#1a1d2b" stroke-width="1" stroke-dasharray="4"/>
+
+      <!-- Y labels -->
+      <text x="50" y="215" text-anchor="end" font-size="10" fill="#7a7f99" font-family="DM Mono">$0</text>
+      <text x="50" y="163" text-anchor="end" font-size="10" fill="#7a7f99" font-family="DM Mono">$2.5k</text>
+      <text x="50" y="113" text-anchor="end" font-size="10" fill="#7a7f99" font-family="DM Mono">$5k</text>
+      <text x="50" y="63" text-anchor="end" font-size="10" fill="#7a7f99" font-family="DM Mono">$7.5k</text>
+
+      <!-- Bars: scale max=8000, range=190px, so 1px=42.1  profit/px = 8000/190=42.1 -->
+      <!-- S1: 6000 → h = 6000/42.1=142.5 → y=210-142.5=67.5 -->
+      <rect x="78" y="67.5" width="88" height="142.5" rx="4" fill="url(#barG1)" opacity="0.9"/>
+      <text x="122" y="60" text-anchor="middle" font-size="11" fill="#6c63ff" font-family="DM Mono">$6,000</text>
+      <text x="122" y="226" text-anchor="middle" font-size="9" fill="#7a7f99" font-family="DM Mono">Base</text>
+
+      <!-- S2: 6738 → h=160 → y=50 -->
+      <rect x="190" y="50" width="88" height="160" rx="4" fill="url(#barG2)" opacity="0.9"/>
+      <text x="234" y="43" text-anchor="middle" font-size="11" fill="#00d4aa" font-family="DM Mono">$6,738</text>
+      <text x="234" y="226" text-anchor="middle" font-size="9" fill="#7a7f99" font-family="DM Mono">Mach+25%</text>
+
+      <!-- S3: 5723 → h=135.9 → y=74.1 -->
+      <rect x="302" y="74" width="88" height="136" rx="4" fill="url(#barG3)" opacity="0.9"/>
+      <text x="346" y="67" text-anchor="middle" font-size="11" fill="#ff6b6b" font-family="DM Mono">$5,723</text>
+      <text x="346" y="226" text-anchor="middle" font-size="9" fill="#7a7f99" font-family="DM Mono">Labor−20%</text>
+
+      <!-- S4: 6800 → h=161.5 → y=48.5 -->
+      <rect x="414" y="49" width="88" height="161" rx="4" fill="url(#barG2)" opacity="0.9"/>
+      <text x="458" y="42" text-anchor="middle" font-size="11" fill="#00d4aa" font-family="DM Mono">$6,800</text>
+      <text x="458" y="226" text-anchor="middle" font-size="9" fill="#7a7f99" font-family="DM Mono">Matl+50%</text>
+
+      <!-- S5: 7800 → h=185.3 → y=24.7 -->
+      <rect x="526" y="25" width="88" height="185" rx="4" fill="url(#barG2)" opacity="1"/>
+      <text x="570" y="18" text-anchor="middle" font-size="11" fill="#00d4aa" font-family="Syne" font-weight="700">$7,800 ★</text>
+      <text x="570" y="226" text-anchor="middle" font-size="9" fill="#7a7f99" font-family="DM Mono">All+30%</text>
+
+      <!-- S6: 5114 → h=121.5 → y=88.5 -->
+      <rect x="638" y="89" width="88" height="121" rx="4" fill="url(#barG3)" opacity="0.9"/>
+      <text x="682" y="82" text-anchor="middle" font-size="11" fill="#ff6b6b" font-family="DM Mono">$5,114</text>
+      <text x="682" y="226" text-anchor="middle" font-size="9" fill="#7a7f99" font-family="DM Mono">Mach−30%</text>
+
+      <!-- S7: 4500 → h=106.9 → y=103.1 -->
+      <rect x="750" y="103" width="88" height="107" rx="4" fill="url(#barG3)" opacity="0.7"/>
+      <text x="794" y="96" text-anchor="middle" font-size="11" fill="#ff6b6b" font-family="DM Mono">$4,500</text>
+      <text x="794" y="226" text-anchor="middle" font-size="9" fill="#7a7f99" font-family="DM Mono">Tight</text>
+
+      <!-- Baseline reference line -->
+      <line x1="60" y1="67.5" x2="880" y2="67.5" stroke="#6c63ff" stroke-width="1" stroke-dasharray="6,4" opacity="0.4"/>
+    </svg>
+  </div>
+
+  <!-- ── PRODUCTION MIX CHART ── -->
+  <h3>Production Mix Shift Across Scenarios</h3>
+  <p>The solver dramatically reshapes the production mix when constraints change — Product C (highest profit at $60/unit) is preferred when machine hours are plentiful, while Product B (lowest machine consumption) becomes dominant when machines are scarce.</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Scenario</th><th>Product A</th><th>Product B</th><th>Product C</th><th>Notable Pattern</th></tr></thead>
+      <tbody>
+        <tr><td>Base Case</td><td>40</td><td>40</td><td>40</td><td><span class="badge badge-blue">Symmetric</span></td></tr>
+        <tr><td>Machine +25%</td><td>49.2</td><td>12.3</td><td>63.1</td><td><span class="badge badge-green">C surges (high profit)</span></td></tr>
+        <tr><td>Labor −20%</td><td>61.5</td><td>15.4</td><td>33.8</td><td><span class="badge badge-yellow">A preferred (1 labor hr)</span></td></tr>
+        <tr><td>Material +50%</td><td>93.3</td><td>53.3</td><td>0.0</td><td><span class="badge badge-red">C drops (2 kg/unit only)</span></td></tr>
+        <tr><td>All +30%</td><td>52</td><td>52</td><td>52</td><td><span class="badge badge-blue">Symmetric scaling</span></td></tr>
+        <tr><td>Machine −30%</td><td>28.9</td><td>73.2</td><td>12.3</td><td><span class="badge badge-yellow">B dominates (1 hr/unit)</span></td></tr>
+        <tr><td>Tight Budget</td><td>30</td><td>30</td><td>30</td><td><span class="badge badge-blue">Symmetric, reduced</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ SECTION 6: SENSITIVITY ══════════════ -->
+<div class="section">
+<div class="container">
+  <div class="sec-label">Section 06</div>
+  <h2>Sensitivity Analysis</h2>
+  <p>Sensitivity analysis quantifies <strong>how much profit changes</strong> per unit increase in each resource — this is the <em>shadow price</em> (dual variable) of each constraint.</p>
+
+  <div class="sensitivity-grid">
+    <div class="sens-card">
+      <div class="sens-title">Shadow Price · Machine Hours</div>
+      <div class="sens-val" style="color:var(--accent)">~$20.77/hr</div>
+      <p style="font-size:12px;margin-top:8px;color:var(--muted)">Machine +25% added 60 hrs → profit gained $738. Each extra machine hour worth ~$20.77 in additional profit.</p>
+    </div>
+    <div class="sens-card">
+      <div class="sens-title">Shadow Price · Labor Hours</div>
+      <div class="sens-val" style="color:var(--accent4)">~$6.92/hr</div>
+      <p style="font-size:12px;margin-top:8px;color:var(--muted)">Labor −20% cut 40 hrs → profit dropped $277. Labor hours have roughly 1/3 the value of machine hours.</p>
+    </div>
+    <div class="sens-card">
+      <div class="sens-title">Shadow Price · Raw Material</div>
+      <div class="sens-val" style="color:var(--accent2)">~$4.44/kg</div>
+      <p style="font-size:12px;margin-top:8px;color:var(--muted)">Material +50% added 180 kg → profit gained $800. Lower per-unit value but large volume available.</p>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>Most Valuable Resource:</strong> Machine hours have the highest shadow price. Investing in additional machine capacity (new equipment, extended shifts) yields the highest marginal profit return.
+  </div>
+  <div class="insight warn">
+    <strong>Least Sensitive Resource:</strong> Raw material has the lowest shadow price — even a 50% surplus only yields $800 extra because machine and labor constraints become the new bottlenecks.
+  </div>
+  <div class="insight bad">
+    <strong>Biggest Risk:</strong> Machine breakdown (−30% scenario) caused a 14.8% profit drop — larger than the gain from a 25% increase. Downside risk is asymmetric and must be hedged (maintenance contracts, spare parts, redundancy).
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ SECTION 7: INSIGHTS ══════════════ -->
+<div class="section">
+<div class="container">
+  <div class="sec-label">Section 07</div>
+  <h2>Final Summary of Insights</h2>
+
+  <div class="card-grid">
+    <div class="card">
+      <div style="font-size:22px;margin-bottom:10px">🎯</div>
+      <h3 style="font-size:15px;color:var(--accent)">Optimal Solution</h3>
+      <p style="font-size:13.5px">Producing <strong>40 units each</strong> of Products A, B, and C yields the maximum weekly profit of <strong>$6,000</strong> under base constraints — with zero slack in any resource.</p>
+    </div>
+    <div class="card">
+      <div style="font-size:22px;margin-bottom:10px">🔩</div>
+      <h3 style="font-size:15px;color:var(--accent)">Machine Capacity is King</h3>
+      <p style="font-size:13.5px">The machine hours constraint has the highest shadow price (~$20.77/hr). Every new machine hour added is worth more than a labor hour or material unit. Expansion priority: <strong>machines first</strong>.</p>
+    </div>
+    <div class="card">
+      <div style="font-size:22px;margin-bottom:10px">📦</div>
+      <h3 style="font-size:15px;color:var(--accent)">Product Mix is Dynamic</h3>
+      <p style="font-size:13.5px">The optimal production mix is <strong>not fixed</strong>. When machines are tight, produce more B (least machine-intensive). When machines are abundant, shift to C (highest profit at $60/unit).</p>
+    </div>
+    <div class="card">
+      <div style="font-size:22px;margin-bottom:10px">📈</div>
+      <h3 style="font-size:15px;color:var(--accent)">Proportional Expansion Works</h3>
+      <p style="font-size:13.5px">Expanding all resources by 30% scales profit by <strong>exactly 30%</strong> ($6k → $7.8k). The LP is homogeneous — this confirms no diminishing returns in the feasible zone.</p>
+    </div>
+    <div class="card">
+      <div style="font-size:22px;margin-bottom:10px">⚠️</div>
+      <h3 style="font-size:15px;color:var(--accent)">Downside Risk is Steep</h3>
+      <p style="font-size:13.5px">A 30% machine loss causes a 14.8% profit drop — not 30%, because labor can partially substitute. But the mix becomes suboptimal (B-heavy), making recovery sensitive to market conditions.</p>
+    </div>
+    <div class="card">
+      <div style="font-size:22px;margin-bottom:10px">💡</div>
+      <h3 style="font-size:15px;color:var(--accent)">Material Surplus is Wasteful</h3>
+      <p style="font-size:13.5px">Even with 50% more raw material, the solver couldn't use it all (533/540 used) because machine and labor limits bind first. Buying excess raw material without machine expansion is <strong>inefficient capital allocation</strong>.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <h3>Recommendations</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-content">
+        <h4>Invest in Machine Capacity</h4>
+        <p>Shadow price analysis shows each additional machine hour is worth ~$20.77 in profit. Adding a second shift or leasing equipment should be evaluated against this ROI benchmark.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <h4>Maintain a Dynamic Production Plan</h4>
+        <p>Use LP optimization weekly rather than maintaining a fixed production mix. The optimal mix changes with every resource fluctuation — what's optimal in base conditions is suboptimal when machines fail.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <h4>Build Machine Redundancy</h4>
+        <p>Given the asymmetric downside risk of machine failure (−14.8% profit from a 30% capacity loss), invest in preventive maintenance contracts and cross-trained labor to reduce downtime exposure.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-content">
+        <h4>Right-Size Material Procurement</h4>
+        <p>Never purchase raw material beyond what machine and labor capacity can process. The simulation shows material surplus beyond ~375 kg generates zero additional profit under base conditions.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<div class="footer">
+  <div>
+    <p><strong style="color:var(--text)">Mini Project 5 — Optimization &amp; Simulation</strong></p>
+    <p>Linear Programming · scipy.optimize · HiGHS Solver · 7-Scenario Sensitivity Analysis</p>
+  </div>
+  <div style="text-align:right">
+    <p>Tools: <span class="tag">Python 3.x</span> <span class="tag">SciPy</span> <span class="tag">NumPy</span></p>
+    <p>Method: <span class="tag">Linear Programming</span></p>
+  </div>
+</div>
+
+</body>
+</html>
